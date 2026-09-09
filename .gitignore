@@ -1,7 +1,4 @@
-# Ignore downloaded archives and installers
 *.exe
 *.zip
-
-# Ignore the generated HLS stream and media segments
 /stream/
 /extracted/
