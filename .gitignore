@@ -1,14 +1,10 @@
-# Standard Python ignores
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Ignore downloaded archives
+# Ignore downloaded archives and installers
 *.exe
 *.zip
 
-# Ignore extracted screensaver assets
-/screensaver/
+# Ignore extracted screensaver assets, but keep the folder structure
+/screensaver/*
+!/screensaver/.gitkeep
 
 # Ignore the generated HLS stream and media segments
 /stream/
