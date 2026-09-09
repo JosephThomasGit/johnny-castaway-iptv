@@ -5,7 +5,6 @@ RUN dpkg --add-architecture i386 && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     xvfb \
-    fluxbox \
     wine \
     wine32 \
     ffmpeg \
@@ -21,7 +20,7 @@ ENV WINEARCH=win32
 
 WORKDIR /app
 
-COPY <<-'EOF' /app/run_castaway.py
+COPY <<-'PYTHON_EOF' /app/run_castaway.py
 import subprocess
 import time
 import os
@@ -67,36 +66,42 @@ if not scr_file:
 
 scr_work_dir = os.path.dirname(scr_file)
 
-print("Starting Virtual Display (Xvfb)...")
-subprocess.Popen(['Xvfb', ':99', '-screen', '0', '800x600x24'])
+print("Starting Virtual Display (Xvfb at 640x480)...")
+subprocess.Popen(['Xvfb', ':99', '-screen', '0', '640x480x24'])
 time.sleep(2)
 os.environ['DISPLAY'] = ':99'
 
-print("Starting Window Manager (Fluxbox)...")
-subprocess.Popen(['fluxbox'])
-time.sleep(1)
+print("Configuring Wine display settings...")
+subprocess.run(['wine', 'reg', 'add', 'HKEY_CURRENT_USER\\Software\\Wine\\Graphics', '/v', 'UseXVidMode', '/t', 'REG_SZ', '/d', 'N', '/f'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 print(f"Booting Johnny Castaway from {scr_file}...")
-subprocess.Popen(['wine', scr_file, '/S'], cwd=scr_work_dir)
+subprocess.Popen(['wine', 'explorer', '/desktop=Castaway,640x480', scr_file, '/S'], cwd=scr_work_dir)
 
-# Give Wine a moment to spawn the window, then force it to scale to full 800x600
-time.sleep(3)
+time.sleep(4)
 try:
-    subprocess.run(['xdotool', 'search', '--onlyvisible', '--class', 'wine', 'windowsize', '800', '600'], check=False)
-    subprocess.run(['xdotool', 'search', '--onlyvisible', '--class', 'wine', 'windowmove', '0', '0'], check=False)
+    result = subprocess.run(['xdotool', 'search', '--onlyvisible', '--class', 'wine'], capture_output=True, text=True)
+    for wid in result.stdout.split():
+        wid_clean = wid.strip()
+        if wid_clean:
+            subprocess.run(['xdotool', 'windowsize', wid_clean, '640', '480'], check=False)
+            subprocess.run(['xdotool', 'windowmove', wid_clean, '0', '0'], check=False)
 except Exception as e:
     print(f"Window sizing note: {e}")
 
 print("Starting FFmpeg HLS Transcoder...")
 ffmpeg_cmd = [
     'ffmpeg', '-nostdin', '-y',
-    '-video_size', '800x600',
+    '-f', 'x11grab',
     '-framerate', '30',
-    '-f', 'x11grab', '-i', ':99.0',
-    '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p',
+    '-video_size', '640x480',
+    '-i', ':99.0',
+    '-c:v', 'libx264',
+    '-preset', 'ultrafast',
+    '-tune', 'zerolatency',
+    '-pix_fmt', 'yuv420p',
     '-f', 'hls', 
-    '-hls_time', '4', 
-    '-hls_list_size', '5',
+    '-hls_time', '2', 
+    '-hls_list_size', '3',
     '-hls_flags', 'delete_segments',
     '/app/stream/castaway.m3u8'
 ]
@@ -106,7 +111,7 @@ print(f"Starting HTTP Stream Server on port {PORT}...")
 os.chdir(STREAM_DIR)
 with socketserver.TCPServer(("", PORT), http.server.SimpleHTTPRequestHandler) as httpd:
     httpd.serve_forever()
-EOF
+PYTHON_EOF
 
 EXPOSE 9081
 CMD ["python3", "-u", "/app/run_castaway.py"]
