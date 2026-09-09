@@ -7,6 +7,8 @@ RUN dpkg --add-architecture i386 && \
     xvfb \
     wine \
     wine32 \
+    pulseaudio \
+    alsa-utils \
     ffmpeg \
     python3 \
     innoextract \
@@ -66,6 +68,10 @@ if not scr_file:
 
 scr_work_dir = os.path.dirname(scr_file)
 
+print("Starting PulseAudio sound server...")
+subprocess.Popen(['pulseaudio', '--start', '--exit-idle-time=-1'])
+time.sleep(2)
+
 print("Starting Virtual Display (Xvfb at 640x480)...")
 subprocess.Popen(['Xvfb', ':99', '-screen', '0', '640x480x24'])
 time.sleep(2)
@@ -88,17 +94,22 @@ try:
 except Exception as e:
     print(f"Window sizing note: {e}")
 
-print("Starting FFmpeg HLS Transcoder...")
+print("Starting FFmpeg HLS Transcoder (Video + Audio)...")
 ffmpeg_cmd = [
     'ffmpeg', '-nostdin', '-y',
     '-f', 'x11grab',
-    '-framerate', '30',
+    '-framerate', '20',
     '-video_size', '640x480',
     '-i', ':99.0',
+    '-f', 'pulse',
+    '-i', 'default.monitor',
     '-c:v', 'libx264',
     '-preset', 'ultrafast',
     '-tune', 'zerolatency',
     '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac',
+    '-b:a', '128k',
+    '-ar', '44100',
     '-f', 'hls', 
     '-hls_time', '2', 
     '-hls_list_size', '3',
