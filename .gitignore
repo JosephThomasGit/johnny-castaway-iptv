@@ -2,9 +2,6 @@
 *.exe
 *.zip
 
-# Ignore extracted screensaver assets, but keep the folder structure
-/screensaver/*
-!/screensaver/.gitkeep
-
 # Ignore the generated HLS stream and media segments
 /stream/
+/extracted/
