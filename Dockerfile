@@ -10,7 +10,6 @@ RUN dpkg --add-architecture i386 && \
     wine32 \
     ffmpeg \
     python3 \
-    wget \
     innoextract \
     p7zip-full \
     unzip \
@@ -21,64 +20,53 @@ ENV WINEARCH=win32
 
 WORKDIR /app
 
-# Embedded Python orchestrator pointing to a stable mirror source
 COPY <<-'EOF' /app/run_castaway.py
 import subprocess
 import time
 import os
 import http.server
 import socketserver
-import urllib.request
-import shutil
 
-SS_DIR = '/app/screensaver'
+WORK_DIR = '/app/extracted'
 STREAM_DIR = '/app/stream'
-# Fallback to a stable archive mirror URL if screensaversplanet throws 404
-DOWNLOAD_URL = os.environ.get('DOWNLOAD_URL', 'https://ia801400.us.archive.org/3/items/johnny-castaway-screensaver/johnny-castaway-screensaver.zip')
+SRC_PATH = os.environ.get('SCR_PATH')
 PORT = 9081
 
 os.makedirs(STREAM_DIR, exist_ok=True)
-os.makedirs(SS_DIR, exist_ok=True)
+os.makedirs(WORK_DIR, exist_ok=True)
+
+if not SRC_PATH or not os.path.exists(SRC_PATH):
+    print(f"ERROR: SCR_PATH environment variable is not set or file does not exist: {SRC_PATH}")
+    exit(1)
 
 def find_scr_file():
-    for root, dirs, files in os.walk(SS_DIR):
+    for root, dirs, files in os.walk(WORK_DIR):
         for file in files:
             if file.lower().endswith('.scr'):
                 return os.path.join(root, file)
     return None
 
+# Handle extraction based on file type
+print(f"Processing source file: {SRC_PATH}")
+if SRC_PATH.lower().endswith('.exe'):
+    result = subprocess.run(['innoextract', '-d', WORK_DIR, SRC_PATH])
+    if result.returncode != 0:
+        subprocess.run(['7z', 'x', SRC_PATH, f'-o{WORK_DIR}', '-y'])
+elif SRC_PATH.lower().endswith('.zip'):
+    subprocess.run(['unzip', '-o', SRC_PATH, '-d', WORK_DIR])
+elif SRC_PATH.lower().endswith('.scr'):
+    # If a raw .scr file was provided directly, copy it into the workspace
+    dest_path = os.path.join(WORK_DIR, os.path.basename(SRC_PATH))
+    import shutil
+    shutil.copy(SRC_PATH, dest_path)
+
 scr_file = find_scr_file()
 
 if not scr_file:
-    print(f"Downloading installer package from: {DOWNLOAD_URL}")
-    is_zip = DOWNLOAD_URL.lower().endswith('.zip')
-    archive_path = '/app/installer.zip' if is_zip else '/app/installer.exe'
-    
-    req = urllib.request.Request(DOWNLOAD_URL, headers={'User-Agent': 'Mozilla/5.0'})
-    try:
-        with urllib.request.urlopen(req) as response, open(archive_path, 'wb') as out_file:
-            shutil.copyfileobj(response, out_file)
-    except Exception as e:
-        print(f"ERROR: Failed to download archive: {e}")
-        exit(1)
-        
-    print("Download complete. Extracting payload...")
-    
-    if is_zip:
-        subprocess.run(['unzip', '-o', archive_path, '-d', SS_DIR], check=True)
-    else:
-        result = subprocess.run(['innoextract', '-d', SS_DIR, archive_path])
-        if result.returncode != 0:
-            print("innoextract fallback to 7zip...")
-            subprocess.run(['7z', 'x', archive_path, f'-o{SS_DIR}', '-y'], check=True)
-            
-    scr_file = find_scr_file()
-
-if not scr_file:
-    print("ERROR: Could not locate a valid .SCR file following extraction.")
+    print("ERROR: Could not locate a valid .SCR file from the provided path.")
     exit(1)
 
-work_dir = os.path.dirname(scr_file)
+scr_work_dir = os.path.dirname(scr_file)
 
 print("Starting Virtual Display (Xvfb)...")
 subprocess.Popen(['Xvfb', ':99', '-screen', '0', '800x600x24'])
@@ -90,7 +78,7 @@ subprocess.Popen(['fluxbox'])
 time.sleep(1)
 
 print(f"Booting Johnny Castaway from {scr_file}...")
-subprocess.Popen(['wine', scr_file, '/S'], cwd=work_dir)
+subprocess.Popen(['wine', scr_file, '/S'], cwd=scr_work_dir)
 
 print("Starting FFmpeg HLS Transcoder...")
 ffmpeg_cmd = [
