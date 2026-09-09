@@ -9,6 +9,7 @@ import shutil
 SS_DIR = '/app/screensaver'
 STREAM_DIR = '/app/stream'
 DOWNLOAD_URL = os.environ.get('DOWNLOAD_URL')
+PORT = 9081
 
 os.makedirs(STREAM_DIR, exist_ok=True)
 os.makedirs(SS_DIR, exist_ok=True)
@@ -87,7 +88,7 @@ ffmpeg_cmd = [
 ]
 subprocess.Popen(ffmpeg_cmd)
 
-print("Starting HTTP Server on port 8080...")
+print(f"Starting HTTP Server on port {PORT}...")
 os.chdir(STREAM_DIR)
-with socketserver.TCPServer(("", 8080), http.server.SimpleHTTPRequestHandler) as httpd:
+with socketserver.TCPServer(("", PORT), http.server.SimpleHTTPRequestHandler) as httpd:
     httpd.serve_forever()
