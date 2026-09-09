@@ -6,5 +6,6 @@ services:
       # The direct download link to the installer
       - DOWNLOAD_URL=https://www.screensaversplanet.com/files/screensavers/jc15.exe
     ports:
-      - "8080:8080"
+      # Mapped to a unique port to avoid conflicts with other media servers
+      - "9081:9081"
     restart: unless-stopped
