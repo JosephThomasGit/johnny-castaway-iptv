@@ -27,6 +27,12 @@ Running a 32-bit/16-bit Windows application on a modern Linux-based container re
 * **Storage Footprint:** Approximately **1.2 GB** for the Docker image (driven by the Wine compatibility layer and X11 graphics libraries).
 * **Memory Usage:** Consumes roughly **400 MB to 600 MB of RAM** while actively transcoding.
 
+
+Disclaimer
+This repository contains strictly independent, open-source automation scripts, configuration templates, and orchestration files designed to run legacy software environments within modern containerized infrastructure. This project does not distribute, host, bundle, or share copyrighted software binaries, proprietary installers, or commercial assets.
+
+All intellectual property rights, trademarks, and copyrights associated with Johnny Castaway remain the exclusive property of their respective creators, developers, and copyright holders.
+
 ---
 
 ## Installation & Setup Guide
@@ -36,9 +42,3 @@ Open your terminal and clone the repository to your local machine:
 ```bash
 git clone [https://github.com/YourUsername/johnny-castaway-iptv.git](https://github.com/YourUsername/johnny-castaway-iptv.git)
 cd johnny-castaway-iptv
-
-
-Disclaimer
-This repository contains strictly independent, open-source automation scripts, configuration templates, and orchestration files designed to run legacy software environments within modern containerized infrastructure. This project does not distribute, host, bundle, or share copyrighted software binaries, proprietary installers, or commercial assets.
-
-All intellectual property rights, trademarks, and copyrights associated with Johnny Castaway remain the exclusive property of their respective creators, developers, and copyright holders.
