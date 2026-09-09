@@ -4,11 +4,11 @@ This project brings the legendary 1992 Johnny Castaway screensaver into the mode
 
 ## Features
 * **Bring Your Own File:** Designed to run with your locally downloaded screensaver installer or extracted assets without committing copyrighted binaries to Git.
-* **Headless Emulation:** Uses `Xvfb`, `Fluxbox`, and `Wine32` to run a 16-bit application cleanly on Linux.
+* **Headless Emulation:** Uses `Xvfb`, `Fluxbox`, `Wine32`, and `xdotool` to run and scale the 16-bit application cleanly on Linux.
 * **Live Transcoding:** FFmpeg captures the virtual display and outputs a rolling HLS stream.
 * **Cross-Platform:** Works seamlessly on Windows, Mac, and Linux through Docker Desktop.
 
-> **Note on Image Size:** Because this container bundles a graphical environment and a 32-bit Windows compatibility layer (Wine), the resulting Docker image size is roughly **1.2 GB**. 
+> **Note on Image Size:** Because this container bundles a graphical environment and a 32-bit Windows compatibility layer (Wine), the resulting Docker image size is roughly **1.2 GB**, consuming roughly 400-600 MB of RAM while running.
 
 ## Prerequisites
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
