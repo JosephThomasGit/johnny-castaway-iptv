@@ -13,6 +13,7 @@ RUN dpkg --add-architecture i386 && \
     innoextract \
     p7zip-full \
     unzip \
+    xdotool \
     && rm -rf /var/lib/apt/lists/*
 
 ENV WINEDEBUG=-all
@@ -46,7 +47,6 @@ def find_scr_file():
                 return os.path.join(root, file)
     return None
 
-# Handle extraction based on file type
 print(f"Processing source file: {SRC_PATH}")
 if SRC_PATH.lower().endswith('.exe'):
     result = subprocess.run(['innoextract', '-d', WORK_DIR, SRC_PATH])
@@ -55,7 +55,6 @@ if SRC_PATH.lower().endswith('.exe'):
 elif SRC_PATH.lower().endswith('.zip'):
     subprocess.run(['unzip', '-o', SRC_PATH, '-d', WORK_DIR])
 elif SRC_PATH.lower().endswith('.scr'):
-    # If a raw .scr file was provided directly, copy it into the workspace
     dest_path = os.path.join(WORK_DIR, os.path.basename(SRC_PATH))
     import shutil
     shutil.copy(SRC_PATH, dest_path)
@@ -79,6 +78,14 @@ time.sleep(1)
 
 print(f"Booting Johnny Castaway from {scr_file}...")
 subprocess.Popen(['wine', scr_file, '/S'], cwd=scr_work_dir)
+
+# Give Wine a moment to spawn the window, then force it to scale to full 800x600
+time.sleep(3)
+try:
+    subprocess.run(['xdotool', 'search', '--onlyvisible', '--class', 'wine', 'windowsize', '800', '600'], check=False)
+    subprocess.run(['xdotool', 'search', '--onlyvisible', '--class', 'wine', 'windowmove', '0', '0'], check=False)
+except Exception as e:
+    print(f"Window sizing note: {e}")
 
 print("Starting FFmpeg HLS Transcoder...")
 ffmpeg_cmd = [
