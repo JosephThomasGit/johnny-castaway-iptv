@@ -1,24 +1,23 @@
 # Johnny Castaway IPTV Streamer
 
-This project brings the legendary 1992 Johnny Castaway screensaver into the modern era. It automatically downloads the legacy 16-bit Windows screensaver, runs it headlessly inside a Docker container, and broadcasts the video as a lightweight HLS (`.m3u8`) stream. 
-
-Perfect for 24/7 background streaming on home dashboards, custom IPTV channels, or nostalgic media server feeds.
+This project brings the legendary 1992 Johnny Castaway screensaver into the modern era. It takes your locally supplied screensaver file, runs it headlessly inside a Docker container via Wine, and broadcasts the video as a lightweight HLS (`.m3u8`) stream. 
 
 ## Features
-* **Zero-Touch Setup:** Automatically downloads and unpacks the installer on the first run.
-* **Headless Emulation:** Uses a lightweight virtual display (Xvfb) and 32-bit Wine.
-* **Live Transcoding:** FFmpeg captures the virtual screen and serves a rolling HLS playlist.
-* **Cross-Platform:** Works seamlessly on Windows, Mac, and Linux via Docker Desktop.
-* **Host Accessible:** Uses standard port mapping so media servers (Jellyfin, Plex) running directly on the host machine can easily consume the stream.
+* **Bring Your Own File:** Designed to run with your locally downloaded screensaver installer or extracted assets without committing copyrighted binaries to Git.
+* **Headless Emulation:** Uses `Xvfb`, `Fluxbox`, and `Wine32` to run a 16-bit application cleanly on Linux.
+* **Live Transcoding:** FFmpeg captures the virtual display and outputs a rolling HLS stream.
+* **Cross-Platform:** Works seamlessly on Windows, Mac, and Linux through Docker Desktop.
+
+> **Note on Image Size:** Because this container bundles a graphical environment and a 32-bit Windows compatibility layer (Wine), the resulting Docker image size is roughly **1.2 GB**. 
 
 ## Prerequisites
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 * Git installed on your system.
+* A local copy of your screensaver file (e.g., `jc15.exe` or `.scr` assets).
 
-## Installation via Docker Desktop
+## Installation & Running
 
-1. **Clone the repository**  
-   Open your terminal (or Command Prompt/PowerShell) and run:
+1. **Clone the repository:**
    ```bash
    git clone [https://github.com/YourUsername/johnny-castaway-iptv.git](https://github.com/YourUsername/johnny-castaway-iptv.git)
    cd johnny-castaway-iptv
