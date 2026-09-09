@@ -21,6 +21,7 @@ WORKDIR /app
 
 COPY run_castaway.py .
 
-EXPOSE 8080
+# Expose the new unique port
+EXPOSE 9081
 
 CMD ["python3", "-u", "run_castaway.py"]
