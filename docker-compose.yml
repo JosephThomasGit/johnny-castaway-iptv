@@ -3,9 +3,10 @@ services:
     build: .
     container_name: johnny-tv
     environment:
-      # The direct download link to the installer
-      - DOWNLOAD_URL=https://www.screensaversplanet.com/files/screensavers/jc15.exe
+      # Point this to wherever the file lives on your host machine
+      - SCR_PATH=/mnt/media/screensavers/jc15.exe
+    volumes:
+      - /mnt/media/screensavers:/host_media:ro
     ports:
-      # Mapped to a unique port to avoid conflicts with other media servers
       - "9081:9081"
     restart: unless-stopped
