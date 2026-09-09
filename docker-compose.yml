@@ -1,0 +1,10 @@
+services:
+  johnny-castaway:
+    build: .
+    container_name: johnny-tv
+    environment:
+      # The direct download link to the installer
+      - DOWNLOAD_URL=https://www.screensaversplanet.com/files/screensavers/jc15.exe
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
