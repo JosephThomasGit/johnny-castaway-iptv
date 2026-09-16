@@ -1,16 +1,40 @@
+version: '3.8'
+
 services:
-  johnny-castaway:
-    build: .
-    container_name: johnny-tv
+  audio-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.audio
+    container_name: johnny-audio
+    environment:
+      - PULSE_SERVER=unix:/run/pulse/native
+    volumes:
+      - /run/pulse/native:/run/pulse/native
+      - shared_audio:/tmp/audio_socket
+    ipc: host
+    restart: unless-stopped
+
+  johnny-stream:
+    build:
+      context: .
+      dockerfile: Dockerfile.stream
+    container_name: johnny-stream
     environment:
       - SCR_PATH=/host_media/johnnycastaway.exe
+      - AUDIO_SOCKET=/tmp/audio_socket/audio.sock
     volumes:
       - C:/Users/jthom/Downloads:/host_media:ro
+      - shared_audio:/tmp/audio_socket
     ports:
       - "9081:9081"
+    depends_on:
+      - audio-server
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 768M
-          cpus: '0.50'
+          memory: 1.5G
+          cpus: '2.5'
+
+volumes:
+  shared_audio:
