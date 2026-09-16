@@ -1,0 +1,16 @@
+FROM linuxserver/wine:latest
+
+RUN apt-get update && apt-get install -y \
+    x11-utils xvfb xdotool \
+    ffmpeg \
+    pulseaudio alsa-utils \
+    innoextract p7zip-full \
+    curl wget \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY stream_castaway.py /app/stream_castaway.py
+
+EXPOSE 9081
+
+CMD ["python3", "-u", "/app/stream_castaway.py"]
