@@ -4,6 +4,6 @@ RUN apt-get update && apt-get install -y \
     pulseaudio alsa-utils \
     && rm -rf /var/lib/apt/lists/*
 
-COPY audio_capture.py /app/audio_capture.py
+WORKDIR /app
 
-CMD ["python3", "-u", "/app/audio_capture.py"]
+CMD ["pulseaudio", "--daemonize=no"]
